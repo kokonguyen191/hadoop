@@ -29,10 +29,13 @@ import org.apache.hadoop.hdfs.server.blockmanagement.BlockPlacementPolicyRackFau
 import org.apache.hadoop.hdfs.server.common.HdfsServerConstants;
 import org.apache.hadoop.hdfs.server.datanode.fsdataset.impl.RamDiskReplicaLruTracker;
 import org.apache.hadoop.hdfs.server.datanode.fsdataset.impl.ReservedSpaceCalculator;
+import org.apache.hadoop.hdfs.server.namenode.fgl.DefaultBlocksMapGSet;
 import org.apache.hadoop.hdfs.server.namenode.fgl.FSNLockManager;
 import org.apache.hadoop.hdfs.server.namenode.fgl.GlobalFSNamesystemLock;
 import org.apache.hadoop.hdfs.web.URLConnectionFactory;
 import org.apache.hadoop.http.HttpConfig;
+import org.apache.hadoop.util.GSet;
+import org.apache.hadoop.util.LightWeightGSet;
 
 import java.util.concurrent.TimeUnit;
 
@@ -2078,4 +2081,15 @@ public class DFSConfigKeys extends CommonConfigurationKeys {
   public static final long DFS_LEASE_HARDLIMIT_DEFAULT =
       HdfsClientConfigKeys.DFS_LEASE_HARDLIMIT_DEFAULT;
 
+  public static final String DFS_NAMENODE_BLOCKSMAP_GSET_CLASS_KEY =
+      "dfs.namenode.blocksmap.gset.class";
+  public static final Class<? extends GSet> DFS_NAMENODE_BLOCKSMAP_GSET_CLASS_DEFAULT =
+      DefaultBlocksMapGSet.class;
+  public static final String DFS_NAMENODE_INODEMAP_GSET_CLASS_KEY =
+      "dfs.namenode.inodemap.gset.class";
+  public static final Class<? extends GSet> DFS_NAMENODE_INODEMAP_GSET_CLASS_DEFAULT =
+      LightWeightGSet.class;
+  public static final String DFS_NAMENODE_FINE_GRAINED_LOCK_GSET_BINS_KEY =
+      "dfs.namenode.fgl.gset.bins";
+  public static final int DFS_NAMENODE_FINE_GRAINED_LOCK_GSET_BINS_DEFAULT = 2048;
 }

@@ -24,6 +24,8 @@ import org.apache.hadoop.classification.VisibleForTesting;
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hdfs.DFSUtilClient;
+import org.apache.hadoop.util.GSet;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -121,5 +123,22 @@ public final class NameNodeUtils {
 
   private NameNodeUtils() {
     // Disallow construction
+  }
+
+  /**
+   * Create a {@link GSet}. To be used in {@link INodeMap}
+   * and {@link org.apache.hadoop.hdfs.server.blockmanagement.BlocksMap}.
+   *
+   * @param clazz        {@link GSet} implementation
+   * @param initCapacity initial capacity
+   */
+  public static <K, E extends K> GSet<K, E> newGSetMap(Class<? extends GSet> clazz,
+      int initCapacity) {
+    try {
+      return clazz.getDeclaredConstructor(Integer.TYPE).newInstance(initCapacity);
+    } catch (Exception e) {
+      throw new RuntimeException(
+          "Class " + clazz.getName() + " is not a supported thread-safe GSet implementation.", e);
+    }
   }
 }

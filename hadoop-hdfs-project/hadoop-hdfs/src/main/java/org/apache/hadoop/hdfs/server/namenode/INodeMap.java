@@ -19,13 +19,14 @@ package org.apache.hadoop.hdfs.server.namenode;
 
 import java.util.Iterator;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.permission.FsPermission;
 import org.apache.hadoop.fs.permission.PermissionStatus;
+import org.apache.hadoop.hdfs.DFSConfigKeys;
 import org.apache.hadoop.hdfs.protocol.HdfsConstants;
 import org.apache.hadoop.hdfs.server.blockmanagement.BlockStoragePolicySuite;
 import org.apache.hadoop.util.GSet;
 import org.apache.hadoop.util.LightWeightGSet;
-
 import org.apache.hadoop.util.Preconditions;
 
 /**
@@ -34,11 +35,12 @@ import org.apache.hadoop.util.Preconditions;
  */
 public class INodeMap {
   
-  static INodeMap newInstance(INodeDirectory rootDir) {
+  static INodeMap newInstance(INodeDirectory rootDir, Configuration conf) {
     // Compute the map capacity by allocating 1% of total memory
     int capacity = LightWeightGSet.computeCapacity(1, "INodeMap");
-    GSet<INode, INodeWithAdditionalFields> map =
-        new LightWeightGSet<>(capacity);
+    Class<? extends GSet> clazz = conf.getClass(DFSConfigKeys.DFS_NAMENODE_INODEMAP_GSET_CLASS_KEY,
+        DFSConfigKeys.DFS_NAMENODE_INODEMAP_GSET_CLASS_DEFAULT, GSet.class);
+    GSet<INode, INodeWithAdditionalFields> map = NameNodeUtils.newGSetMap(clazz, capacity);
     map.put(rootDir);
     return new INodeMap(map);
   }

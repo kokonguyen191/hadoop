@@ -79,7 +79,7 @@ public class LightWeightGSet<K, E extends K> implements GSet<K, E> {
    */
   protected int modification = 0;
 
-  private Collection<E> values;
+  protected Collection<E> values;
 
   protected LightWeightGSet() {
   }
@@ -168,8 +168,8 @@ public class LightWeightGSet<K, E extends K> implements GSet<K, E> {
     final E existing = remove(index, element);
 
     // insert the element to the head of the linked list
-    modification++;
-    size++;
+    incrementModification();
+    incrementSize();
     e.setNext(entries[index]);
     entries[index] = e;
 
@@ -190,8 +190,8 @@ public class LightWeightGSet<K, E extends K> implements GSet<K, E> {
       return null;
     } else if (entries[index].equals(key)) {
       //remove the head of the linked list
-      modification++;
-      size--;
+      incrementModification();
+      decrementSize();
       final LinkedElement e = entries[index];
       entries[index] = e.getNext();
       e.setNext(null);
@@ -203,8 +203,8 @@ public class LightWeightGSet<K, E extends K> implements GSet<K, E> {
       for(LinkedElement curr = prev.getNext(); curr != null; ) {
         if (curr.equals(key)) {
           //found the element, remove it
-          modification++;
-          size--;
+          incrementModification();
+          decrementSize();
           prev.setNext(curr.getNext());
           curr.setNext(null);
           return convert(curr);
@@ -377,7 +377,7 @@ public class LightWeightGSet<K, E extends K> implements GSet<K, E> {
   }
   
   @VisibleForTesting
-  static int computeCapacity(long maxMemory, double percentage,
+  public static int computeCapacity(long maxMemory, double percentage,
       String mapName) {
     if (percentage > 100.0 || percentage < 0.0) {
       throw new HadoopIllegalArgumentException("Percentage " + percentage
@@ -415,10 +415,38 @@ public class LightWeightGSet<K, E extends K> implements GSet<K, E> {
     LOG.info("capacity      = 2^" + exponent + " = " + c + " entries");
     return c;
   }
-  
+
+  /**
+   *  Not thread-safe. Thread-safety to be handled by callers of this method if necessary.
+   */
   public void clear() {
-    modification++;
+    incrementModification();
     Arrays.fill(entries, null);
     size = 0;
+  }
+
+  @VisibleForTesting
+  public int realSize() {
+    int res = 0;
+    for (LinkedElement entry: entries) {
+      LinkedElement cur = entry;
+      while (cur != null) {
+        res++;
+        cur = cur.getNext();
+      }
+    }
+    return res;
+  }
+
+  protected void incrementModification() {
+    modification++;
+  }
+
+  protected void incrementSize() {
+    size++;
+  }
+
+  protected void decrementSize() {
+    size--;
   }
 }

@@ -6600,4 +6600,33 @@
       Enables observer reads for clients. This should only be enabled when clients are using routers.
     </description>
   </property>
+  <property>
+    <name>dfs.namenode.blocksmap.gset.class</name>
+    <value>org.apache.hadoop.hdfs.server.namenode.fgl.DefaultBlocksMapGSet</value>
+    <description>
+      The underlying GSet implementation of the blocks map
+      in org.apache.hadoop.hdfs.server.blockmanagement.BlocksMap.
+      Set to org.apache.hadoop.hdfs.server.namenode.fgl.ThreadSafeLightWeightGSet
+      if NN fine-grained locking is to be used.
+    </description>
+  </property>
+  <property>
+    <name>dfs.namenode.inodemap.gset.class</name>
+    <value>org.apache.hadoop.util.LightWeightGSet</value>
+    <description>
+      The underlying GSet implementation of the iNode map
+      in org.apache.hadoop.hdfs.server.namenode.INodeMap.
+      Set to org.apache.hadoop.hdfs.server.namenode.fgl.ThreadSafeLightWeightGSet
+      if NN fine-grained locking is to be used.
+    </description>
+  </property>
+  <property>
+    <name>dfs.namenode.fgl.gset.lock.bins</name>
+    <value>2048</value>
+    <description>
+      The suggested number of locks used by
+      org.apache.hadoop.hdfs.server.namenode.fgl.ThreadSafeLightWeightGSet.
+      Rounded up to the nearest power of 2 and capped by the GSet capacity.
+    </description>
+  </property>
 </configuration>

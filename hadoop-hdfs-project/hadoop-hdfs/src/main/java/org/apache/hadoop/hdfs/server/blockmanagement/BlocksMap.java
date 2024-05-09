@@ -20,8 +20,11 @@ package org.apache.hadoop.hdfs.server.blockmanagement;
 import java.util.Iterator;
 import java.util.concurrent.atomic.LongAdder;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hdfs.DFSConfigKeys;
 import org.apache.hadoop.hdfs.protocol.Block;
 import org.apache.hadoop.hdfs.server.namenode.INodeId;
+import org.apache.hadoop.hdfs.server.namenode.NameNodeUtils;
 import org.apache.hadoop.util.GSet;
 import org.apache.hadoop.util.LightWeightGSet;
 
@@ -71,23 +74,12 @@ class BlocksMap {
   private final LongAdder totalReplicatedBlocks = new LongAdder();
   private final LongAdder totalECBlockGroups = new LongAdder();
 
-  BlocksMap(int capacity) {
+  BlocksMap(int capacity, Configuration conf) {
     // Use 2% of total memory to size the GSet capacity
     this.capacity = capacity;
-    this.blocks = new LightWeightGSet<Block, BlockInfo>(capacity) {
-      @Override
-      public Iterator<BlockInfo> iterator() {
-        SetIterator iterator = new SetIterator();
-        /*
-         * Not tracking any modifications to set. As this set will be used
-         * always under FSNameSystem lock, modifications will not cause any
-         * ConcurrentModificationExceptions. But there is a chance of missing
-         * newly added elements during iteration.
-         */
-        iterator.setTrackModification(false);
-        return iterator;
-      }
-    };
+    Class<? extends GSet> clazz = conf.getClass(DFSConfigKeys.DFS_NAMENODE_BLOCKSMAP_GSET_CLASS_KEY,
+        DFSConfigKeys.DFS_NAMENODE_BLOCKSMAP_GSET_CLASS_DEFAULT, GSet.class);
+    this.blocks = NameNodeUtils.newGSetMap(clazz, capacity);
   }
 
 
